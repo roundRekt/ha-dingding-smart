@@ -59,8 +59,6 @@ local/
 
 # Package files
 *.zip
-!dingding_smart.zip
-!dingding_smart-*.zip
 
 # Test files
 test_*.py
@@ -70,6 +68,4 @@ test_*.py
 # Documentation
 *.md
 !README.md
-!README_HACS.md
 !DASHBOARD_EXAMPLES.md
-!PUBLISH_TO_HACS.md

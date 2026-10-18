@@ -1,9 +1,11 @@
-# 叮叮智能门铃 - Home Assistant 集成
+# 叮叮智能 - Home Assistant 集成
 
 基于逆向的Python推送实现的Home Assistant自定义集成，支持叮叮智能门铃/摄像头的开门事件监控、远程开锁等功能。
 
 ## 功能特性
 
+- ✅ 门锁设备映射（原生支持 HA `lock` 平台，开锁状态联动，5秒自动上锁）
+- ✅ 设备与实体归入（支持 HA 设备注册表，将门锁、传感器、二进制传感器归入统一设备）
 - ✅ 实时推送监听（基于SSL/TLS）
 - ✅ 开门事件监控（指纹、密码、门内开锁）
 - ✅ 门铃呼叫通知
@@ -16,55 +18,57 @@
 
 ## GitHub仓库
 
-📦 **GitHub地址**: https://github.com/thedays/ha-dingding-smart
+📦 **GitHub地址**: https://github.com/roundRekt/ha-dingding-smart
 
-## 安装
+## 安装指南
 
-### 方法1：通过HACS安装（推荐）
+### 方法 1：通过 HACS 自定义存储库安装（推荐）
 
-1. 打开Home Assistant
-2. 进入 "HACS" → "集成"
-3. 点击 "浏览并下载集成"
-4. 搜索 "dingding" 或 "叮叮智能"
-5. 点击安装
-6. 重启Home Assistant
+本集成支持通过 HACS（Home Assistant Community Store）添加自定义存储库安装，后续可直接在 HACS 内一键更新：
 
-### 方法2：手动安装
+1. 打开 Home Assistant，在左侧边栏点击 **HACS**
+2. 点击右上角 **三个点 (⋮)** 菜单，选择 **自定义存储库**（Custom repositories）
+3. 在弹出的窗口中填入：
+   - **存储库**：`https://github.com/roundRekt/ha-dingding-smart`
+   - **类别**：选择 **集成**（Integration）
+4. 点击 **添加**（Add），等待添加完成
+5. 在 HACS 集成列表中搜索并进入 **叮叮智能**，点击右下角 **下载**（Download）
+6. 下载完成后，**重启 Home Assistant**
 
-将 `custom_components/dingding_smart` 目录复制到你的Home Assistant配置目录：
+---
 
-```bash
-# 默认配置目录
-cp -r custom_components/dingding_smart ~/.homeassistant/custom_components/
+### 方法 2：手动安装（备用）
 
-# 对于Docker安装
-cp -r custom_components/dingding_smart /path/to/your/homeassistant/config/custom_components/
+如果不使用 HACS，也可以直接手动部署：
 
-# 对于Home Assistant OS
-# 通过Samba或SSH复制到/config/custom_components/目录
-```
+1. 下载或克隆本仓库代码
+2. 将 `custom_components/dingding_smart` 文件夹复制到你的 Home Assistant 配置目录的 `custom_components/` 目录下：
+   ```bash
+   # 默认配置目录
+   cp -r custom_components/dingding_smart ~/.homeassistant/custom_components/
 
-### 3. 重启Home Assistant
+   # 对于 Docker 安装环境
+   cp -r custom_components/dingding_smart /path/to/your/homeassistant/config/custom_components/
 
-```bash
-# 如果使用Docker
-docker restart homeassistant
+   # 对于 Home Assistant OS
+   # 通过 Samba、FTP 或 SSH 传输到 /config/custom_components/ 目录下
+   ```
+3. 重启 Home Assistant
 
-# 如果使用Home Assistant OS
-# 在界面中点击 "设置" -> "系统" -> "重启"
-```
+---
 
-### 4. 添加集成
+### 添加集成与配置
 
-1. 打开Home Assistant
-2. 进入 "设置" → "设备与服务"
-3. 点击 "添加集成"
-4. 搜索 "dingding" 或 "叮叮智能"
-5. 填写配置信息：
-   - 用户名：叮叮智能App的登录账号（手机号）
-   - 密码：叮叮智能App的登录密码
-   - 服务器区域：选择服务器所在区域（中国/欧洲/美国）
-6. 点击 "提交"
+重启完成后，即可在 Home Assistant 界面中添加设备：
+
+1. 打开 Home Assistant，进入 **设置** → **设备与服务**
+2. 点击右下角 **添加集成**
+3. 搜索 **叮叮智能**（或 `dingding`）并点击
+4. 在配置界面填写账号信息：
+   - **用户名/手机号**：叮叮智能 App 的登录账号（手机号）
+   - **密码**：叮叮智能 App 登录密码
+   - **服务器区域**：选择账号所在的服务器区域（中国 / 欧洲 / 美国）
+5. 点击 **提交**，系统将自动验证登录并自动发现加载所有门锁与传感器设备
 
 ## 配置
 
@@ -90,9 +94,17 @@ dingding_smart:
   imei: "your_imei"  # 可选：设备IMEI号，用于推送绑定
 ```
 
-## 实体
+## 实体与设备归入
 
-### 传感器实体
+本集成支持 Home Assistant 设备注册表（Device Registry），会将每个门锁设备的门锁实体、传感器、二进制传感器统一归入到同一个设备卡片下。
+
+### 门锁实体 (Lock)
+
+| 实体ID | 名称 | 说明 |
+|---------|------|------|
+| `lock.{device_name}_lock` | 门锁 | 原生门锁实体。平时为已锁定状态；检测到开门事件后自动切换为开锁状态，并在 5 秒后自动恢复为已锁定。支持在 HA 中手动锁定。 |
+
+### 传感器实体 (Sensor)
 
 集成会为每个设备创建以下传感器：
 
@@ -102,16 +114,18 @@ dingding_smart:
 | `sensor.{device_name}_wifi_signal` | WiFi信号 | 设备WiFi信号强度 |
 | `sensor.{device_name}_status` | 设备状态 | 设备当前状态 |
 | `sensor.{device_name}_last_unlock` | 最后开锁 | 最后一次开锁事件信息 |
-| `binary_sensor.{device_name}_door_lock` | 门锁状态 | 门锁开关状态（5秒自动恢复） |
+| `sensor.{device_name}_online` | 在线状态 | 设备在线状态布尔值 |
+| `sensor.{device_name}_version` | 固件版本 | 设备固件版本信息 |
+| `sensor.{device_name}_uid` | 设备UID | 设备唯一标识符 |
+| `sensor.{device_name}_online_type` | 在线类型 | 连接类型（WiFi/有线/4G） |
+| `sensor.{device_name}_update_time` | 最后更新 | 设备最后更新时间 |
 
-### 门锁状态传感器
+### 二进制传感器实体 (Binary Sensor)
 
-门锁状态传感器会在检测到开锁事件时自动变为"开锁"状态，5秒后自动恢复为"关锁"状态。
-
-**支持的开锁方法**：
-- `fingerprint` - 指纹开锁
-- `password` - 密码开锁
-- `inside_lock` - 门内开锁
+| 实体ID | 名称 | 说明 |
+|---------|------|------|
+| `binary_sensor.{device_name}_door_lock` | 门内开锁状态 | 门内开锁状态（5秒自动恢复） |
+| `binary_sensor.{device_name}_outside_door_unlock` | 门外开锁状态 | 门外开锁状态（5秒自动恢复） |
 
 ## 事件
 
@@ -294,7 +308,7 @@ automation:
 
 **解决方法**:
 - 检查用户名和密码是否正确
-- 确认账号可以在钉钉智能App中正常登录
+- 确认账号可以在叮叮智能App中正常登录
 - 检查服务器区域是否选择正确
 
 ### 未找到设备
@@ -303,8 +317,8 @@ automation:
 
 **解决方法**:
 - 确认账号下已绑定设备
-- 在钉钉智能App中检查设备是否在线
-- 尝试重新登录钉钉智能App
+- 在叮叮智能App中检查设备是否在线
+- 尝试重新登录叮叮智能App
 
 ### 推送连接失败
 
@@ -366,7 +380,7 @@ automation:
 
 ### 实现原理
 
-1. **认证流程**: 通过模拟钉钉智能App的登录请求获取token
+1. **认证流程**: 通过模拟叮叮智能App的登录请求获取token
 2. **设备发现**: 使用token获取用户绑定的设备列表
 3. **推送连接**: 建立SSL/TLS连接到推送服务器
 4. **Token绑定**: 将推送Token绑定到API服务器
@@ -383,13 +397,18 @@ homeassistant/
 ├── custom_components/
 │   └── dingding_smart/
 │       ├── __init__.py          # 主集成文件
+│       ├── binary_sensor.py     # 二进制传感器实体
 │       ├── config_flow.py       # 配置流程
+│       ├── entity.py            # 基础实体
+│       ├── lock.py              # 门锁实体
 │       ├── manifest.json        # 集成清单
 │       ├── sensor.py            # 传感器实体
-│       ├── binary_sensor.py     # 二进制传感器实体
-│       └── strings.json         # 本地化字符串
-├── README.md                    # 本文件
-└── dingding_smart.zip         # 发布包
+│       ├── strings.json         # 本地化字符串模板
+│       └── translations/        # 多语言翻译目录
+│           ├── zh-Hans.json     # 简体中文
+│           └── en.json          # 英文
+├── hacs.json                    # HACS 集成配置文件
+└── README.md                    # 本文件
 ```
 
 ### 开发环境设置
@@ -404,6 +423,12 @@ homeassistant/
 欢迎提交Issue和Pull Request！
 
 ## 版本历史
+
+### v1.0.25 (2026-10-18)
+- ✅ 新增门锁设备映射（支持 HA 原生 Lock 平台）
+- ✅ 新增设备注册表支持，将门锁与各个传感器、二进制传感器归入对应设备
+- ✅ 优化门锁与传感器定时器资源释放
+- ✅ 修复配置界面文本本地化问题
 
 ### v1.0.12 (2026-02-25)
 - ✅ 优化门锁状态自动恢复时间为5秒
@@ -427,7 +452,7 @@ homeassistant/
 
 ## 致谢
 
-- 感谢钉钉智能门铃设备的支持
+- 感谢叮叮智能设备的支持
 - 基于逆向的Python推送实现
 - Home Assistant社区的支持
 

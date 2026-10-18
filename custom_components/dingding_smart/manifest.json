@@ -1,12 +1,15 @@
 {
   "domain": "dingding_smart",
-  "name": "叮叮智能门铃",
-  "codeowners": ["@thedays"],
+  "name": "叮叮智能",
+  "codeowners": [
+    "@thedays",
+    "@roundRekt"
+  ],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/thedays/ha-dingding-smart",
-  "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/thedays/ha-dingding-smart/issues",
+  "documentation": "https://github.com/roundRekt/ha-dingding-smart",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/roundRekt/ha-dingding-smart/issues",
   "requirements": ["aiohttp>=3.8.0"],
-  "version": "1.0.24"
+  "version": "1.0.25"
 }

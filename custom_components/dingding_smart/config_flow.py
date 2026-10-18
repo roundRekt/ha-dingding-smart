@@ -1,4 +1,4 @@
-"""叮叮智能门铃 - 配置流"""
+"""叮叮智能 - 配置流"""
 import logging
 from typing import Any
 import voluptuous as vol
@@ -6,6 +6,15 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_USERNAME, CONF_PASSWORD
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers.selector import (
+    SelectOptionDict,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+    TextSelector,
+    TextSelectorConfig,
+    TextSelectorType,
+)
 
 from . import DOMAIN, REGION_CN, REGION_EU, REGION_US, CONF_SERVER_REGION
 
@@ -13,10 +22,22 @@ _LOGGER = logging.getLogger(__name__)
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_USERNAME): str,
-        vol.Required(CONF_PASSWORD): str,
-        vol.Required(CONF_SERVER_REGION, default=REGION_CN): vol.In(
-            [REGION_CN, REGION_EU, REGION_US]
+        vol.Required(CONF_USERNAME): TextSelector(
+            TextSelectorConfig(type=TextSelectorType.TEXT, autocomplete="username")
+        ),
+        vol.Required(CONF_PASSWORD): TextSelector(
+            TextSelectorConfig(type=TextSelectorType.PASSWORD, autocomplete="current-password")
+        ),
+        vol.Required(CONF_SERVER_REGION, default=REGION_CN): SelectSelector(
+            SelectSelectorConfig(
+                options=[
+                    SelectOptionDict(value=REGION_CN, label="中国 (cn)"),
+                    SelectOptionDict(value=REGION_EU, label="欧洲 (eu)"),
+                    SelectOptionDict(value=REGION_US, label="美国 (us)"),
+                ],
+                mode=SelectSelectorMode.DROPDOWN,
+                translation_key="server_region",
+            )
         ),
     }
 )
@@ -58,7 +79,7 @@ class DingDingConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         self._abort_if_unique_id_configured()
 
                         return self.async_create_entry(
-                            title="钉钉智能门铃",
+                            title=f"叮叮智能 ({user_input[CONF_USERNAME]})",
                             data=user_input,
                         )
 

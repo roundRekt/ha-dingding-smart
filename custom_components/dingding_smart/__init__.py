@@ -1,5 +1,5 @@
 """
-叮叮智能门铃 - Home Assistant集成
+叮叮智能 - Home Assistant集成
 支持开门事件监控、远程开锁等功能
 基于逆向的Python推送实现
 """
@@ -33,7 +33,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "dingding_smart"
-PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR]
+PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.LOCK]
 
 # 配置常量
 CONF_SERVER_REGION = "server_region"
@@ -111,7 +111,7 @@ CONFIG_SCHEMA = vol.Schema(
 
 
 async def async_setup(hass: HomeAssistant, config: dict):
-    """设置钉钉智能集成"""
+    """设置叮叮智能集成"""
     if DOMAIN not in config:
         return True
 
@@ -210,7 +210,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 
 class DingDingAPI:
-    """钉钉智能API客户端"""
+    """叮叮智能API客户端"""
 
     def __init__(self, username: str, password: str, region: str = REGION_CN):
         self.username = username
@@ -425,7 +425,7 @@ class DingDingAPI:
             "os": "Android",
             "os_push_version": 1,
             "bundleid": "com.lancens.wxdoorbell",
-            "phone_model": "phone:Xiaomi_Mi_10/App:钉钉智能_1.0.0/Android_11"
+            "phone_model": "phone:Xiaomi_Mi_10/App:叮叮智能_1.0.0/Android_11"
         }
 
         headers = {
@@ -1033,7 +1033,7 @@ class PushListener:
             "os": "Android",
             "os_push_version": 1,
             "bundleid": "com.lancens.wxdoorbell",
-            "phone_model": "phone:Xiaomi_Mi_10/App:钉钉智能_1.0.0/Android_11"
+            "phone_model": "phone:Xiaomi_Mi_10/App:叮叮智能_1.0.0/Android_11"
         }
 
         try:
@@ -1078,7 +1078,7 @@ class PushListener:
             "os": "Android",
             "os_push_version": 1,
             "bundleid": "com.lancens.wxdoorbell",
-            "phone_model": "phone:Xiaomi_Mi_10/App:钉钉智能_1.0.0/Android_11"
+            "phone_model": "phone:Xiaomi_Mi_10/App:叮叮智能_1.0.0/Android_11"
         }
 
         try:
@@ -1154,7 +1154,7 @@ class PushListener:
 
 
 class DingDingCoordinator(DataUpdateCoordinator):
-    """钉钉智能数据协调器"""
+    """叮叮智能数据协调器"""
 
     def __init__(
         self,

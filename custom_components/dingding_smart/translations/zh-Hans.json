@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "配置叮叮智能",
+        "description": "请输入您的叮叮智能账号信息以添加门锁与传感器设备。",
+        "data": {
+          "username": "用户名/手机号",
+          "password": "密码",
+          "server_region": "服务器区域"
+        },
+        "data_description": {
+          "username": "叮叮智能 App 登录账号（手机号）",
+          "password": "叮叮智能 App 登录密码",
+          "server_region": "账号注册时所在的服务器区域"
+        }
+      }
+    },
+    "error": {
+      "auth_error": "用户名或密码错误，请检查后重试",
+      "no_devices": "登录成功但未在账号下找到设备，请确保设备已在 App 中绑定",
+      "unknown_error": "发生未知错误，请检查网络连接并查看系统日志"
+    },
+    "abort": {
+      "already_configured": "该叮叮智能账号已经配置过了"
+    }
+  },
+  "selector": {
+    "server_region": {
+      "options": {
+        "cn": "中国 (cn)",
+        "eu": "欧洲 (eu)",
+        "us": "美国 (us)"
+      }
+    }
+  }
+}

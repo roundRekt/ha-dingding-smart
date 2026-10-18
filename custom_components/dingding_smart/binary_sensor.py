@@ -1,4 +1,4 @@
-"""叮叮智能门铃 - 二进制传感器实体"""
+"""叮叮智能 - 二进制传感器实体"""
 import logging
 from datetime import datetime, timedelta
 
@@ -6,9 +6,9 @@ from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, Event, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import DOMAIN, DingDingCoordinator, EVENT_DOOR_UNLOCK
+from .entity import DingDingEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,13 +39,11 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class DoorLockSensor(CoordinatorEntity, BinarySensorEntity):
+class DoorLockSensor(DingDingEntity, BinarySensorEntity):
     """门内开锁状态传感器"""
 
     def __init__(self, coordinator: DingDingCoordinator, uid: str, name: str):
-        super().__init__(coordinator)
-        self._uid = uid
-        self._name = name
+        super().__init__(coordinator, uid, name)
         self._attr_unique_id = f"{DOMAIN}_{uid}_door_lock"
         self._attr_name = f"{name} 门内开锁状态"
         self._attr_icon = "mdi:door-closed"
@@ -73,7 +71,6 @@ class DoorLockSensor(CoordinatorEntity, BinarySensorEntity):
                 _LOGGER.info("门内开锁传感器方法匹配成功: %s", method)
                 self._is_unlocked = True
                 self._last_unlock_time = datetime.now()
-                method_display = "门内开锁"
                 
                 _LOGGER.info(
                     "门内开锁状态更新: %s - 开锁",
@@ -112,14 +109,19 @@ class DoorLockSensor(CoordinatorEntity, BinarySensorEntity):
             self.hass.bus.async_listen(EVENT_DOOR_UNLOCK, self._handle_door_unlock_event)
         )
 
+    async def async_will_remove_from_hass(self):
+        """当实体从Home Assistant移除时"""
+        if self._cancel_timer:
+            self._cancel_timer.cancel()
+            self._cancel_timer = None
+        await super().async_will_remove_from_hass()
 
-class OutsideDoorUnlockSensor(CoordinatorEntity, BinarySensorEntity):
+
+class OutsideDoorUnlockSensor(DingDingEntity, BinarySensorEntity):
     """门外开门状态传感器"""
 
     def __init__(self, coordinator: DingDingCoordinator, uid: str, name: str):
-        super().__init__(coordinator)
-        self._uid = uid
-        self._name = name
+        super().__init__(coordinator, uid, name)
         self._attr_unique_id = f"{DOMAIN}_{uid}_outside_door_unlock"
         self._attr_name = f"{name} 门外开锁状态"
         self._attr_icon = "mdi:door-open"
@@ -194,21 +196,20 @@ class OutsideDoorUnlockSensor(CoordinatorEntity, BinarySensorEntity):
 
     async def async_will_remove_from_hass(self):
         """当实体从Home Assistant移除时"""
-        # 取消定时器
         if self._cancel_timer:
-            self._cancel_timer()
+            self._cancel_timer.cancel()
+            self._cancel_timer = None
         await super().async_will_remove_from_hass()
 
     @property
     def extra_state_attributes(self):
         """获取额外属性"""
         attrs = {}
-        for device in self.coordinator.devices:
-            if device.get("uid") == self._uid:
-                attrs["uid"] = device.get("uid")
-                attrs["name"] = device.get("name")
-                if self._last_unlock_time:
-                    attrs["last_unlock_time"] = self._last_unlock_time.isoformat()
-                attrs["last_unlock_method"] = device.get("last_unlock_method", "unknown")
-                break
+        device = self._get_device()
+        if device:
+            attrs["uid"] = device.get("uid")
+            attrs["name"] = device.get("name")
+            if self._last_unlock_time:
+                attrs["last_unlock_time"] = self._last_unlock_time.isoformat()
+            attrs["last_unlock_method"] = device.get("last_unlock_method", "unknown")
         return attrs

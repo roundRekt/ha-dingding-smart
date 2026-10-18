@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "DingDing Smart Configuration",
+        "description": "Enter your DingDing Smart account credentials to add your doorbells, locks and sensors.",
+        "data": {
+          "username": "Username / Phone number",
+          "password": "Password",
+          "server_region": "Server Region"
+        },
+        "data_description": {
+          "username": "Phone number used to register DingDing Smart App",
+          "password": "Password for DingDing Smart App",
+          "server_region": "Server region where your account was registered"
+        }
+      }
+    },
+    "error": {
+      "auth_error": "Invalid username or password",
+      "no_devices": "Login successful, but no devices found under this account",
+      "unknown_error": "An unknown error occurred, please check logs and network connection"
+    },
+    "abort": {
+      "already_configured": "This account is already configured"
+    }
+  },
+  "selector": {
+    "server_region": {
+      "options": {
+        "cn": "China (cn)",
+        "eu": "Europe (eu)",
+        "us": "United States (us)"
+      }
+    }
+  }
+}
